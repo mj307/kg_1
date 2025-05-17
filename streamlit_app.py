@@ -3,8 +3,9 @@ from PIL import Image
 import json
 from datetime import datetime
 import os
-from streamlit_extras.let_it_rain import rain
-
+#from streamlit_extras.let_it_rain import rain
+import plotly.express as px
+import pandas as pd
 
 message_file = "messages.json"
 
@@ -85,12 +86,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Title and subtitle
+
 st.title("With Love, Med and Kaju")
 st.subheader("Starring Med. Featuring Kaju 😉")
-st.write("Tiny love things 🧸💛")
 
-# 3-column layout for the photo boxes
+
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -140,27 +140,84 @@ with row2_col3:
 
 st.markdown("""
     <div style="background-color: #e1e1e1; padding: 2rem; border-radius: 15px; box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1); text-align: center;">
-        <h2 style="color: #333;">🎶 *Our Little Soundtrack* 💿</h2>
-        <p style="color: #333; font-size: 18px;">Songs that sound like us 💖</p>
+        <h2 style="color: #333;">🎶 Songs that remind us of each other  💿</h2>
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/CD_icon_2.svg/768px-CD_icon_2.svg.png" style="width: 150px; margin: 1rem auto;" />
         <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3tb2MNGJcoBSgW6JcsMapG?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" loading="lazy"></iframe>
     </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<h2 style='text-align: center;'> *Our Story* </h2>", unsafe_allow_html=True)
-
-timeline = [
-    ("Jan 2022", "First long-distance call that lasted 6 hours 💬"),
-    ("May 2022", "Kaju became official 🐻"),
-    ("Aug 2022", "Met in real life for the first time ✈️"),
-    ("Dec 2022", "First trip together 🌴")
+st.write()
+st.write()
+timeline_events = [
+    ("2024-02-01", "med stalks kaju on insta"),
+    ("2024-03-05", "med and kaju meet in JCL wrap line"),
+    ("2024-04-06", "start talking"),
+    ("2024-04-19", "first kiss:D"),
+    ("2024-04-20", "official!!"),
+    ("2024-05-04", "med leaves for cali 💔"),
+    ("2024-08-24", "long distance over :D"),
+    ("2024-08-30", "first date after LD"),
+    ("2024-09-20", "first in-person anniversary"),
+    ("2024-10-20", "6 months YAY"),
+    ("2024-11-08", "movie date (med's fav date🥰)"),
+    ("2025-02-14", "valentine's day 💘"),
+    ("2025-03-01", "first holiiiii"),
+    ("2025-04-20", "one year 💞")
 ]
 
-for date, event in timeline:
-    st.markdown(f"**{date}:** {event}")
+df_timeline = pd.DataFrame(timeline_events, columns=["Date", "Event"])
+df_timeline["Date"] = pd.to_datetime(df_timeline["Date"])
+
+import plotly.graph_objects as go
+
+fig = go.Figure()
 
 
-# Message wall title
+fig.add_trace(go.Scatter(
+    x=[df_timeline["Date"].min(), df_timeline["Date"].max()],
+    y=[0, 0],
+    mode="lines",
+    line=dict(color="#a47148", width=3),
+    hoverinfo="skip",
+    showlegend=False
+))
+
+
+fig.add_trace(go.Scatter(
+    x=df_timeline["Date"],
+    y=[0] * len(df_timeline),
+    mode="markers",
+    marker=dict(size=14, color="#d7a86e", line=dict(width=2, color="#a47148")),
+    hovertext=df_timeline["Event"],
+    hovertemplate="<b>%{hovertext}</b><br>%{x|%B %d, %Y}<extra></extra>",
+    showlegend=False
+))
+
+
+fig.update_layout(
+    height=220,
+    xaxis=dict(
+        title="",
+        showgrid=False,
+        tickformat="%b %Y", 
+        tickfont=dict(color="#5a3e36", size=12)
+    ),
+    yaxis=dict(
+        visible=False
+    ),
+    plot_bgcolor="#f5e6d3", 
+    paper_bgcolor="#f5e6d3",
+    margin=dict(t=20, b=40, l=20, r=20),
+)
+
+st.subheader("📅 Our Timeline")
+st.plotly_chart(fig, use_container_width=True)
+
+
+
+
+
+
 st.markdown("<h2 style='text-align: center;'>💌 Leave a Message</h2>", unsafe_allow_html=True)
 
 # Text area input
@@ -182,7 +239,7 @@ if st.button("Send"):
             json.dump(messages, file, indent=4)
 
         st.success("Message sent!")
-        rain(emoji="🤎",font_size=20,falling_speed=5,animation_length=2,)
+        #rain(emoji="🤎",font_size=20,falling_speed=5,animation_length=2,)
 
         st.session_state.message_input = ""
 
